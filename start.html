@@ -45,12 +45,21 @@ function createSession() {
     const simLink = base + "index.html?session=" + id;
     const resultLink = base + "results.html?session=" + id;
 
+    const qrSim = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(simLink);
+    const qrResult = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(resultLink);
+
     document.getElementById("session").innerHTML =
         "Session-ID: <b>" + id + "</b><br><br>" +
-        "Link für Publikum:<br>" +
+
+        "<b>Link für Publikum:</b><br>" +
         "<a href='" + simLink + "' style='color:white'>" + simLink + "</a><br><br>" +
-        "Ergebnis-Seite:<br>" +
-        "<a href='" + resultLink + "' style='color:white'>" + resultLink + "</a>";
+
+        "<img src='" + qrSim + "'><br><br>" +
+
+        "<b>Ergebnis-Seite:</b><br>" +
+        "<a href='" + resultLink + "' style='color:white'>" + resultLink + "</a><br><br>" +
+
+        "<img src='" + qrResult + "'>";
 }
 </script>
 
