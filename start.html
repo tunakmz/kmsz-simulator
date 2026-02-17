@@ -39,9 +39,10 @@ button {
 <script>
 function createSession() {
     const id = Math.floor(Math.random()*1000000);
-    const base = window.location.origin + window.location.pathname.replace("start.html","");
 
-    const simLink = base + "?session=" + id;
+    const base = "https://tunakmz.github.io/kmsz-simulator/";
+
+    const simLink = base + "index.html?session=" + id;
     const resultLink = base + "results.html?session=" + id;
 
     document.getElementById("session").innerHTML =
