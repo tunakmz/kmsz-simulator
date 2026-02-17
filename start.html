@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Neue Simulation starten</title>
+
+<style>
+body {
+    font-family: Arial;
+    text-align: center;
+    padding: 40px;
+    background-color: #4FA3D1;
+    color: white;
+}
+
+button {
+    font-size: 1.5em;
+    padding: 20px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+}
+
+.session {
+    font-size: 1.4em;
+    margin-top: 30px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Neue Vortragssession starten</h1>
+
+<button onclick="createSession()">Session erzeugen</button>
+
+<div class="session" id="session"></div>
+
+<script>
+function createSession() {
+    const id = Math.floor(Math.random()*1000000);
+    const base = window.location.origin + window.location.pathname.replace("start.html","");
+
+    const simLink = base + "?session=" + id;
+    const resultLink = base + "results.html?session=" + id;
+
+    document.getElementById("session").innerHTML =
+        "Session-ID: <b>" + id + "</b><br><br>" +
+        "Link für Publikum:<br>" +
+        "<a href='" + simLink + "' style='color:white'>" + simLink + "</a><br><br>" +
+        "Ergebnis-Seite:<br>" +
+        "<a href='" + resultLink + "' style='color:white'>" + resultLink + "</a>";
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HLA Simulation – KMSZ</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #4FA3D1;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+}
+
+.logo {
+    position: absolute;
+    top: 20px;
+    width: 150px;
+}
+
+.container {
+    width: 90%;
+    max-width: 500px;
+}
+
+h1 {
+    font-size: 1.9em;
+    margin-bottom: 40px;
+}
+
+button {
+    background: white;
+    color: #4FA3D1;
+    border: none;
+    padding: 24px;
+    font-size: 1.6em;
+    border-radius: 50px;
+    width: 100%;
+    cursor: pointer;
+}
+
+.animation {
+    display: none;
+    margin-top: 40px;
+    gap: 12px;
+    justify-content: center;
+}
+
+.hla {
+    width: 65px;
+    height: 95px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    animation: scan 0.8s infinite;
+}
+
+.hla:nth-child(2){ animation-delay:0.1s; }
+.hla:nth-child(3){ animation-delay:0.2s; }
+.hla:nth-child(4){ animation-delay:0.3s; }
+.hla:nth-child(5){ animation-delay:0.4s; }
+
+@keyframes scan {
+    0% { transform: translateY(0); opacity:0.4;}
+    50% { transform: translateY(-14px); opacity:1;}
+    100% { transform: translateY(0); opacity:0.4;}
+}
+
+.result {
+    display: none;
+    margin-top: 40px;
+    font-size: 3em;
+    font-weight: bold;
+}
+
+.result-text {
+    font-size: 1.4em;
+    margin-top: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<img src="logo.jpg" class="logo">
+
+<div class="container">
+
+<h1>Teste, ob du zu einem Patienten passen würdest</h1>
+
+<button id="startBtn">Simulation starten</button>
+
+<div class="animation" id="animation">
+    <div class="hla">HLA-A</div>
+    <div class="hla">HLA-B</div>
+    <div class="hla">HLA-C</div>
+    <div class="hla">HLA-DR</div>
+    <div class="hla">HLA-DQ</div>
+</div>
+
+<div id="result" class="result"></div>
+<div id="resultText" class="result-text"></div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCaifpTXBg6gDxhp69FcxmyQc8vtu-Ui4o",
+  authDomain: "kmsz-simulator.firebaseapp.com",
+  projectId: "kmsz-simulator",
+  storageBucket: "kmsz-simulator.firebasestorage.app",
+  messagingSenderId: "193438905817",
+  appId: "1:193438905817:web:b608c1af5caaa6922555c8"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const params = new URLSearchParams(window.location.search);
+const session = params.get("session");
+
+const btn = document.getElementById("startBtn");
+const animation = document.getElementById("animation");
+const result = document.getElementById("result");
+const resultText = document.getElementById("resultText");
+
+btn.addEventListener("click", () => {
+    btn.style.display = "none";
+    animation.style.display = "flex";
+    setTimeout(showResult, 2200);
+});
+
+async function showResult() {
+
+    animation.style.display = "none";
+
+    const r = Math.floor(Math.random() * 1000000);
+    let match, text;
+
+    if (r < 5) {
+        match = 10;
+        text = "Vollständige Übereinstimmung";
+    } else if (r < 201) {
+        match = 9;
+        text = "Sehr nahe Übereinstimmung";
+    } else if (r < 3001) {
+        match = 8;
+        text = "Teilweise Übereinstimmung";
+    } else if (r < 40001) {
+        match = Math.random() < 0.5 ? 7 : 6;
+        text = "Keine ausreichende Übereinstimmung";
+    } else {
+        match = Math.floor(Math.random() * 4) + 3;
+        text = "Nicht kompatibel";
+    }
+
+    result.style.display = "block";
+    result.textContent = match + "/10 Match";
+    resultText.textContent = text;
+
+    await addDoc(collection(db, "results"), {
+        match: match,
+        session: session,
+        timestamp: Date.now()
+    });
+}
+
+</script>
+
+</body>
+</html>

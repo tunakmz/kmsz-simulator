@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ergebnisse – HLA Simulation</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #4FA3D1;
+    color: white;
+    text-align: center;
+    padding: 40px;
+}
+
+h1 {
+    font-size: 2.5em;
+    margin-bottom: 40px;
+}
+
+.result {
+    font-size: 1.8em;
+    margin: 10px 0;
+}
+
+.logo {
+    width: 200px;
+    margin-bottom: 30px;
+}
+</style>
+</head>
+
+<body>
+
+<img src="logo.jpg" class="logo">
+
+<h1>Ergebnisse der Simulation</h1>
+
+<div id="results"></div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCaifpTXBg6gDxhp69FcxmyQc8vtu-Ui4o",
+  authDomain: "kmsz-simulator.firebaseapp.com",
+  projectId: "kmsz-simulator",
+  storageBucket: "kmsz-simulator.firebasestorage.app",
+  messagingSenderId: "193438905817",
+  appId: "1:193438905817:web:b608c1af5caaa6922555c8"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const params = new URLSearchParams(window.location.search);
+const session = params.get("session");
+
+async function loadResults() {
+
+    const snapshot = await getDocs(collection(db, "results"));
+
+    const counts = {10:0,9:0,8:0,7:0,6:0,5:0,4:0,3:0};
+
+    snapshot.forEach(doc => {
+        const data = doc.data();
+        if (data.session === session) {
+            counts[data.match]++;
+        }
+    });
+
+    let html = "";
+
+    for (let i = 10; i >= 3; i--) {
+        html += `<div class="result">${i}/10 Match: ${counts[i]} Personen</div>`;
+    }
+
+    document.getElementById("results").innerHTML = html;
+}
+
+loadResults();
+setInterval(loadResults, 3000);
+
+</script>
+
+</body>
+</html>
