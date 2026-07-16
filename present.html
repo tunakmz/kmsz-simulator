@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#EEF7FD">
+<title>Live-Simulation · KMSZ</title>
+<link rel="stylesheet" href="theme.css">
+<style>
+  html, body { height: 100%; overflow: hidden; }
+  .stage {
+    height: 100dvh; max-width: 1600px; margin: 0 auto;
+    display: flex; flex-direction: column;
+    padding: clamp(18px, 2.4vh, 34px) clamp(24px, 3vw, 56px);
+  }
+
+  /* Header */
+  .head { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex: none; }
+  .head .brand-logo { height: clamp(70px, 9vh, 118px); }
+  .head .live { display: flex; align-items: center; gap: 10px; font-size: clamp(.72rem,1.1vw,.85rem); font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--brand-700);
+    background: var(--tint); padding: 9px 18px; border-radius: var(--r-pill); white-space: nowrap; }
+  .live-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--positive); animation: pulse 1.8s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(53,168,122,.5);} 70%{box-shadow:0 0 0 12px rgba(53,168,122,0);} 100%{box-shadow:0 0 0 0 rgba(53,168,122,0);} }
+
+  /* Main split */
+  .split { flex: 1; display: grid; grid-template-columns: minmax(340px, 40%) 1fr; gap: clamp(20px, 2.6vw, 40px);
+    align-items: stretch; min-height: 0; padding: clamp(14px,2vh,26px) 0; }
+  @media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
+
+  .card { display: flex; flex-direction: column; }
+  .pad { padding: clamp(20px, 2.4vw, 34px); }
+
+  /* Join panel */
+  .join { align-items: center; text-align: center; justify-content: center; gap: clamp(12px,1.8vh,22px); }
+  .join .kicker { font-size: clamp(.74rem,1vw,.82rem); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--brand-600); }
+  .join h2 { font-size: clamp(1.4rem, 2.4vw, 2.1rem); }
+  .qr-frame { background: #fff; padding: clamp(10px,1.2vw,16px); border-radius: var(--r-md); line-height: 0; border: 1px solid var(--line); box-shadow: var(--shadow-sm); }
+  .qr-frame img { width: clamp(200px, 24vw, 340px); height: clamp(200px, 24vw, 340px); display: block; border-radius: 6px; }
+  .join .sid { font-size: clamp(.8rem,1.1vw,.95rem); color: var(--ink-soft); }
+  .join .sid b { color: var(--brand-800); letter-spacing: .1em; font-variant-numeric: tabular-nums; }
+  .counter { display: flex; align-items: baseline; gap: 12px; }
+  .counter .n { font-size: clamp(2.4rem, 5vw, 4rem); font-weight: 800; line-height: 1; color: var(--brand-700); font-variant-numeric: tabular-nums; }
+  .counter .l { font-size: clamp(.85rem,1.2vw,1.05rem); color: var(--ink-soft); }
+
+  /* Results panel */
+  .res { justify-content: center; gap: clamp(14px,2vh,24px); }
+  .res .headline { font-size: clamp(1.5rem, 3vw, 2.6rem); line-height: 1.1; }
+  .res .headline .hl { color: var(--brand-600); }
+  .res .sub { color: var(--ink-soft); font-size: clamp(.92rem,1.3vw,1.2rem); line-height: 1.45; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(12px,1.4vw,18px); }
+  .stat { background: var(--tint-2); border: 1px solid var(--line-soft); border-radius: var(--r-md); padding: clamp(14px,1.6vw,20px); }
+  .stat.hl { background: var(--tint); }
+  .stat .k { font-size: clamp(.68rem,.9vw,.76rem); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); }
+  .stat .v { font-size: clamp(2rem,3.6vw,3rem); font-weight: 800; line-height: 1; margin-top: 6px; color: var(--brand-800); font-variant-numeric: tabular-nums; }
+  .bars { display: flex; flex-direction: column; gap: clamp(6px,.9vh,10px); }
+  .bar-row { display: grid; grid-template-columns: clamp(72px,7vw,96px) 1fr clamp(48px,5vw,66px); align-items: center; gap: clamp(10px,1.2vw,16px); }
+  .bar-row .tag { font-weight: 700; font-size: clamp(.82rem,1.05vw,1rem); color: var(--brand-800); font-variant-numeric: tabular-nums; }
+  .bar-row .tag small { display: block; font-weight: 500; font-size: clamp(.64rem,.8vw,.72rem); color: var(--ink-faint); }
+  .track { height: clamp(18px,2.2vh,26px); background: #fff; border-radius: var(--r-pill); overflow: hidden; border: 1px solid var(--line-soft); }
+  .fill { height: 100%; width: 0%; border-radius: var(--r-pill); transition: width 1s var(--ease-out); background: var(--brand); }
+  .fill.pos { background: var(--positive); } .fill.soft { background: var(--soft); }
+  .bar-row .cnt { text-align: right; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; font-size: clamp(.82rem,1vw,1rem); }
+  .bar-row .cnt small { color: var(--ink-faint); font-weight: 500; }
+  .waiting { color: var(--ink-soft); font-size: clamp(.95rem,1.3vw,1.15rem); text-align: center; padding: 8px 0; }
+
+  /* Footer controls (unobtrusive) */
+  .foot { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding-top: 6px; }
+  .foot .brand-note { color: var(--ink-faint); font-size: clamp(.68rem,.9vw,.78rem); }
+  .foot .ctrls { display: flex; gap: 10px; }
+  .mini { appearance: none; cursor: pointer; font-family: inherit; font-weight: 600; font-size: clamp(.74rem,.95vw,.85rem);
+    color: var(--brand-700); background: #fff; border: 1.5px solid var(--line); border-radius: var(--r-pill);
+    padding: 8px 16px; display: inline-flex; align-items: center; gap: 7px; transition: background .2s, border-color .2s; }
+  .mini:hover { background: var(--tint-2); border-color: var(--brand-400); }
+</style>
+</head>
+<body>
+<div class="bg-field"></div>
+
+<div class="stage">
+  <div class="head">
+    <img src="logo-blue.png" class="brand-logo" alt="KMSZ – Knochenmarkspenderzentrale, Universitätsklinikum Düsseldorf">
+    <div class="live"><span class="live-dot"></span> Live-Simulation</div>
+  </div>
+
+  <div class="split">
+    <!-- JOIN -->
+    <div class="join card pad">
+      <div class="kicker">Jetzt mitmachen</div>
+      <h2>QR-Code scannen</h2>
+      <div class="qr-frame"><img id="qrImg" alt="QR-Code zum Mitmachen"></div>
+      <div class="sid">Session <b id="sessionId">–</b></div>
+      <div class="counter">
+        <span class="n mono" id="liveCount">0</span>
+        <span class="l">Teilnehmende</span>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="res card pad">
+      <h1 class="headline" id="headline">Bereit für dein Publikum</h1>
+      <p class="sub" id="sub">Sobald die ersten Teilnehmenden den QR-Code scannen, erscheinen die Ergebnisse hier automatisch in Echtzeit.</p>
+      <div class="stats">
+        <div class="stat">
+          <div class="k">Teilnehmende</div>
+          <div class="v mono" id="totalNum">0</div>
+        </div>
+        <div class="stat hl">
+          <div class="k">Passender Spender</div>
+          <div class="v mono" id="matchNum">0</div>
+        </div>
+      </div>
+      <div class="bars" id="bars">
+        <div class="waiting" id="waiting">Warten auf die ersten Ergebnisse …</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span class="brand-note">Knochenmarkspenderzentrale · Universitätsklinikum Düsseldorf</span>
+    <div class="ctrls">
+      <button class="mini" id="fsBtn" title="Vollbild"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Vollbild</button>
+      <button class="mini" id="newBtn" title="Neue Session"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 8M20 12a8 8 0 0 1-13.7 5.6L4 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 4v4h-4M4 20v-4h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Neue Session</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCaifpTXBg6gDxhp69FcxmyQc8vtu-Ui4o",
+  authDomain: "kmsz-simulator.firebaseapp.com",
+  projectId: "kmsz-simulator",
+  storageBucket: "kmsz-simulator.firebasestorage.app",
+  messagingSenderId: "193438905817",
+  appId: "1:193438905817:web:b608c1af5caaa6922555c8"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const BASE = "https://tunakmz.github.io/kmsz-simulator/";
+const $ = (id) => document.getElementById(id);
+
+const LEVELS = [10, 9, 8, 7, 6, 5, 4, 3];
+const LABEL = { 10:"Volltreffer",9:"sehr nah",8:"teilweise",7:"gering",6:"gering",5:"keine",4:"keine",3:"keine" };
+let unsub = null, built = false;
+
+function newId() {
+  return (Date.now().toString(36).slice(-4) + Math.random().toString(36).slice(2, 4)).toUpperCase();
+}
+
+/* Reuse the session across accidental reloads within the same tab,
+   but start fresh for every new talk (new tab / closed browser). */
+function getSession(forceNew) {
+  let id = forceNew ? null : sessionStorage.getItem("kmsz_session");
+  if (!id) { id = newId(); sessionStorage.setItem("kmsz_session", id); }
+  return id;
+}
+
+function startConsole(forceNew) {
+  const id = getSession(forceNew);
+  const simLink = BASE + "index.html?session=" + id;
+  $("sessionId").textContent = id;
+  $("qrImg").src = "https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=0&color=145273&data=" + encodeURIComponent(simLink);
+
+  // reset view
+  built = false;
+  $("bars").innerHTML = '<div class="waiting" id="waiting">Warten auf die ersten Ergebnisse …</div>';
+  $("liveCount").textContent = "0"; $("liveCount").dataset.v = "0";
+  $("totalNum").textContent = "0"; $("totalNum").dataset.v = "0";
+  $("matchNum").textContent = "0"; $("matchNum").dataset.v = "0";
+  $("headline").textContent = "Bereit für dein Publikum";
+  $("sub").textContent = "Sobald die ersten Teilnehmenden den QR-Code scannen, erscheinen die Ergebnisse hier automatisch in Echtzeit.";
+
+  if (unsub) unsub();
+  const q = query(collection(db, "results"), where("session", "==", id));
+  unsub = onSnapshot(q, (snap) => {
+    const counts = {10:0,9:0,8:0,7:0,6:0,5:0,4:0,3:0};
+    snap.forEach(d => { const m = d.data().match; if (counts[m] !== undefined) counts[m]++; });
+    render(counts);
+  }, () => {
+    $("headline").textContent = "Verbindung wird wiederhergestellt …";
+  });
+}
+
+function buildBars() {
+  const wrap = $("bars"); wrap.innerHTML = "";
+  LEVELS.forEach(l => {
+    const cls = l >= 9 ? "pos" : (l === 8 ? "soft" : "");
+    const row = document.createElement("div");
+    row.className = "bar-row";
+    row.innerHTML = `<div class="tag">${l}/10<small>${LABEL[l]}</small></div>
+      <div class="track"><div class="fill ${cls}" data-l="${l}"></div></div>
+      <div class="cnt" data-c="${l}">0</div>`;
+    wrap.appendChild(row);
+  });
+  built = true;
+}
+
+function render(counts) {
+  const total = LEVELS.reduce((s,l)=>s+counts[l],0);
+  const matched = counts[10] + counts[9];
+
+  animateStat($("liveCount"), total);
+  animateStat($("totalNum"), total);
+  animateStat($("matchNum"), matched);
+
+  if (total === 0) return;
+  if (!built) buildBars();
+
+  const max = Math.max(1, ...LEVELS.map(l => counts[l]));
+  LEVELS.forEach(l => {
+    const fill = document.querySelector(`.fill[data-l="${l}"]`);
+    const cnt = document.querySelector(`.cnt[data-c="${l}"]`);
+    if (fill) fill.style.width = (counts[l]/max*100) + "%";
+    if (cnt) { const pct = Math.round(counts[l]/total*100); cnt.innerHTML = `${counts[l]} <small>· ${pct}%</small>`; }
+  });
+
+  const pct = Math.round(matched/total*100);
+  if (matched === 0) {
+    $("headline").innerHTML = `Von ${total} Menschen hätte <span class="hl">niemand</span> gepasst.`;
+    $("sub").textContent = "Genau deshalb zählt jede einzelne Registrierung – je mehr mitmachen, desto sicherer findet jeder Patient seinen Spender.";
+  } else {
+    $("headline").innerHTML = `Nur <span class="hl">${matched} von ${total}</span> hätten gepasst.`;
+    $("sub").textContent = `Das sind ${pct}% – ein passender Spender ist die Ausnahme. Jede weitere Registrierung erhöht die Chance für Patienten weltweit.`;
+  }
+}
+
+function animateStat(el, to) {
+  const from = parseInt(el.dataset.v || "0", 10);
+  if (from === to) return;
+  el.dataset.v = to;
+  const start = performance.now(), dur = 550;
+  (function step(now){
+    const t = Math.min(1,(now-start)/dur);
+    el.textContent = Math.round(from + (to-from)*(1-Math.pow(1-t,3)));
+    if (t<1) requestAnimationFrame(step);
+  })(performance.now());
+}
+
+$("newBtn").addEventListener("click", () => {
+  if (confirm("Neue Session starten? Die aktuelle Auswertung wird zurückgesetzt.")) startConsole(true);
+});
+$("fsBtn").addEventListener("click", () => {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+  else document.exitFullscreen?.();
+});
+
+startConsole(false);
+</script>
+</body>
+</html>
