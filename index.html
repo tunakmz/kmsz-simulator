@@ -85,7 +85,6 @@
   .takeaway p { font-size: .95rem; line-height: 1.5; color: var(--ink); }
   .takeaway b { color: var(--brand-800); }
   .result .cta-zone { margin-top: 24px; }
-  .redo { background: none; border: 0; color: var(--ink-faint); font-family: inherit; font-size: .85rem; margin-top: 16px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 
   .sync-flag { text-align: center; font-size: .78rem; color: var(--ink-faint); margin-top: 18px; min-height: 1em; }
   footer.foot { text-align: center; color: var(--ink-faint); font-size: .72rem; padding-top: 20px; }
@@ -151,7 +150,6 @@
         </a>
       </div>
       <div class="sync-flag" id="syncFlag"></div>
-      <button class="redo" id="redoBtn">Simulation wiederholen</button>
     </section>
   </main>
 
@@ -202,7 +200,6 @@ function show(section) {
 }
 
 $("startBtn").addEventListener("click", runScan);
-$("redoBtn").addEventListener("click", () => location.reload());
 
 async function runScan() {
   show("scan");
