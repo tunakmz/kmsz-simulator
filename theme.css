@@ -1,0 +1,138 @@
+/* ============================================================
+   KMSZ Simulator — Design System / theme.css
+   Corporate Identity: Universitätsklinikum Düsseldorf · KMSZ
+   Light, ruhig, offiziell — Markenblau #4FA3DB
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* ---- Markenblau & Abstufungen (aus dem Logo) ---- */
+  --brand:      #4FA3DB;   /* Corporate Identity blue */
+  --brand-400:  #6FB6E4;
+  --brand-500:  #3B93CE;
+  --brand-600:  #2E82BC;   /* Buttons / Aktion */
+  --brand-700:  #1E6E9E;   /* kräftige Akzente */
+  --brand-800:  #145273;   /* Überschriften */
+  --brand-900:  #0E3B54;   /* tiefster Text */
+
+  /* ---- Flächen ---- */
+  --bg:         #EEF7FD;   /* zarter Blauschleier */
+  --bg-2:       #FFFFFF;
+  --surface:    #FFFFFF;
+  --tint:       #E4F1FB;   /* hellblaue Fläche */
+  --tint-2:     #F2F9FE;
+
+  /* ---- Text ---- */
+  --ink:        #143A52;   /* dunkles Blaugrau, warm & lesbar */
+  --ink-soft:   #4C6B7C;
+  --ink-faint:  #86A0AF;
+
+  /* ---- Linien ---- */
+  --line:       #D3E6F4;
+  --line-soft:  #E6F1FA;
+
+  /* ---- Signalfarben (dezent, innerhalb der Markenwelt) ---- */
+  --positive:   #35A87A;   /* Übereinstimmung / Hoffnung */
+  --positive-bg:#E7F6EF;
+  --soft:       #C98A2E;   /* Teil-Treffer, gedämpftes Gold */
+  --soft-bg:    #FBF1DE;
+
+  /* ---- Radien ---- */
+  --r-xl: 30px; --r-lg: 22px; --r-md: 16px; --r-sm: 11px; --r-pill: 999px;
+
+  /* ---- Schatten (weich, wie Papier) ---- */
+  --shadow-sm: 0 2px 8px rgba(20,58,82,0.06);
+  --shadow-md: 0 12px 30px -12px rgba(20,58,82,0.18);
+  --shadow-lg: 0 26px 60px -22px rgba(20,58,82,0.28);
+  --shadow-brand: 0 16px 34px -14px rgba(46,130,188,0.5);
+
+  /* ---- Motion ---- */
+  --ease-spring: cubic-bezier(.16, 1, .3, 1);
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh; min-height: 100dvh;
+  position: relative; overflow-x: hidden;
+}
+
+/* Airy, light background — soft brand wash, no dark glows */
+.bg-field {
+  position: fixed; inset: 0; z-index: -1;
+  background:
+    radial-gradient(1200px 620px at 50% -220px, #FFFFFF 0%, rgba(255,255,255,0) 70%),
+    radial-gradient(900px 700px at 100% 0%, rgba(111,182,228,0.22), transparent 60%),
+    radial-gradient(760px 620px at 0% 100%, rgba(79,163,219,0.14), transparent 60%),
+    linear-gradient(180deg, #F4FAFE 0%, #E7F2FB 100%);
+}
+
+/* ---- Typografie ---- */
+h1, h2, h3 { margin: 0; line-height: 1.08; letter-spacing: -0.02em; font-weight: 800; color: var(--brand-900); }
+p { margin: 0; }
+.eyebrow {
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--brand-600);
+}
+.lead { color: var(--ink-soft); font-size: 1.06rem; line-height: 1.55; font-weight: 400; }
+
+/* ---- Logo (prominent) ---- */
+.brand-logo { display: block; width: auto; }
+.logo-lg { height: 160px; }
+.logo-md { height: 110px; }
+.logo-sm { height: 64px; }
+@media (max-width: 560px) { .logo-lg { height: 108px; } .logo-md { height: 92px; } }
+
+/* ---- Buttons ---- */
+.btn {
+  appearance: none; border: 0; cursor: pointer; font-family: inherit;
+  font-weight: 700; font-size: 1.05rem; line-height: 1;
+  padding: 18px 30px; border-radius: var(--r-pill);
+  display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+  transition: transform .5s var(--ease-spring), box-shadow .4s var(--ease-out), background .25s;
+  will-change: transform;
+}
+.btn:active { transform: scale(.97); }
+
+.btn-primary {
+  color: #fff;
+  background: linear-gradient(180deg, var(--brand) 0%, var(--brand-600) 100%);
+  box-shadow: var(--shadow-brand);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 22px 42px -14px rgba(46,130,188,.6); }
+
+.btn-ghost {
+  color: var(--brand-700); background: #fff;
+  border: 1.5px solid var(--line);
+}
+.btn-ghost:hover { background: var(--tint-2); border-color: var(--brand-400); }
+
+.btn-block { width: 100%; }
+
+/* ---- Cards ---- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+}
+
+/* ---- Utilities ---- */
+.center { display: flex; align-items: center; justify-content: center; }
+.mono { font-variant-numeric: tabular-nums; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.rise { animation: rise .7s var(--ease-spring) both; }
+.d1 { animation-delay: .06s; } .d2 { animation-delay: .14s; }
+.d3 { animation-delay: .22s; } .d4 { animation-delay: .30s; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}

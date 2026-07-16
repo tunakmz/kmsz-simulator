@@ -2,122 +2,168 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HLA Simulation – KMSZ</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#EEF7FD">
+<title>HLA-Simulation · KMSZ</title>
+<link rel="stylesheet" href="theme.css">
 <style>
-body {
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: #4FA3D1;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    text-align: center;
-}
+  .wrap {
+    max-width: 480px; margin: 0 auto;
+    min-height: 100dvh; display: flex; flex-direction: column;
+    padding: max(24px, env(safe-area-inset-top)) 22px max(26px, env(safe-area-inset-bottom));
+  }
+  header.top { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  header.top .brand-logo { height: 118px; }
+  @media (max-width: 400px) { header.top .brand-logo { height: 96px; } }
+  .pill-tag {
+    font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--brand-600); background: var(--tint); padding: 6px 14px; border-radius: var(--r-pill);
+  }
 
-.logo {
-    position: absolute;
-    top: 20px;
-    height: 120px;
-    width: 200px;
-}
+  main { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 26px 0 10px; }
 
-.container {
-    width: 90%;
-    max-width: 500px;
-}
+  /* Intro */
+  .intro { text-align: center; }
+  .intro h1 { font-size: clamp(1.85rem, 7.6vw, 2.45rem); }
+  .intro .lead { margin-top: 15px; }
+  .science-note {
+    margin-top: 22px; display: flex; gap: 12px; align-items: flex-start; text-align: left;
+    color: var(--ink-soft); font-size: .92rem; line-height: 1.5;
+    padding: 16px 18px; border-radius: var(--r-md);
+    background: var(--tint-2); border: 1px solid var(--line);
+  }
+  .science-note svg { flex: none; margin-top: 1px; }
+  .cta-zone { margin-top: 28px; }
+  .hint { text-align: center; color: var(--ink-faint); font-size: .82rem; margin-top: 14px; }
 
-h1 {
-    font-size: 1.9em;
-    margin-bottom: 40px;
-}
+  /* Scanning */
+  .scan { display: none; text-align: center; }
+  .scan.show { display: block; }
+  .scan h2 { font-size: 1.32rem; font-weight: 800; color: var(--brand-800); }
+  .scan .sub { color: var(--ink-soft); margin-top: 8px; font-size: .95rem; }
+  .loci { display: flex; flex-direction: column; gap: 10px; margin-top: 28px; }
+  .locus {
+    display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: var(--r-md);
+    background: #fff; border: 1.5px solid var(--line-soft); box-shadow: var(--shadow-sm);
+    opacity: .5; transform: translateY(6px);
+    transition: opacity .45s var(--ease-out), transform .45s var(--ease-spring), border-color .4s, background .4s;
+  }
+  .locus.active { opacity: 1; transform: translateY(0); border-color: var(--brand-400); background: var(--tint-2); }
+  .locus.done { opacity: 1; transform: translateY(0); border-color: rgba(53,168,122,.45); }
+  .locus .dot {
+    width: 34px; height: 34px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    background: var(--tint); border: 1px solid var(--line);
+  }
+  .locus.active .dot { background: #D5EAF8; }
+  .locus.done .dot { background: var(--positive-bg); border-color: rgba(53,168,122,.5); }
+  .locus .name { font-weight: 700; color: var(--brand-800); }
+  .locus .state { margin-left: auto; font-size: .82rem; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+  .locus.done .state { color: var(--positive); }
+  .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--brand); animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .check { opacity: 0; transform: scale(.4); transition: opacity .3s, transform .35s var(--ease-spring); }
+  .locus.done .check { opacity: 1; transform: scale(1); }
 
-button {
-    background: white;
-    color: #4FA3D1;
-    border: none;
-    padding: 24px;
-    font-size: 1.6em;
-    border-radius: 50px;
-    width: 100%;
-    cursor: pointer;
-}
+  /* Result */
+  .result { display: none; text-align: center; }
+  .result.show { display: block; }
+  .gauge { position: relative; width: 190px; height: 190px; margin: 6px auto 4px; }
+  .gauge svg { transform: rotate(-90deg); }
+  .gauge .track { stroke: var(--line); }
+  .gauge .val { stroke-linecap: round; fill: none; transition: stroke-dashoffset 1.3s var(--ease-out); }
+  .gauge .num { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .gauge .num b { font-size: 2.9rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; color: var(--brand-900); }
+  .gauge .num span { font-size: .78rem; color: var(--ink-soft); letter-spacing: .1em; text-transform: uppercase; margin-top: 4px; }
+  .verdict { font-size: 1.5rem; font-weight: 800; margin-top: 14px; }
+  .result .msg { color: var(--ink-soft); font-size: 1rem; line-height: 1.55; margin-top: 12px; }
+  .takeaway {
+    margin-top: 22px; padding: 18px; border-radius: var(--r-md);
+    background: var(--tint-2); border: 1px solid var(--line); text-align: left;
+    display: flex; gap: 13px; align-items: flex-start;
+  }
+  .takeaway .heart { flex: none; }
+  .takeaway p { font-size: .95rem; line-height: 1.5; color: var(--ink); }
+  .takeaway b { color: var(--brand-800); }
+  .result .cta-zone { margin-top: 24px; }
+  .redo { background: none; border: 0; color: var(--ink-faint); font-family: inherit; font-size: .85rem; margin-top: 16px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 
-.animation {
-    display: none;
-    margin-top: 40px;
-    gap: 12px;
-    justify-content: center;
-}
-
-.hla {
-    width: 65px;
-    height: 95px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    animation: scan 0.8s infinite;
-}
-
-.hla:nth-child(2){ animation-delay:0.1s; }
-.hla:nth-child(3){ animation-delay:0.2s; }
-.hla:nth-child(4){ animation-delay:0.3s; }
-.hla:nth-child(5){ animation-delay:0.4s; }
-
-@keyframes scan {
-    0% { transform: translateY(0); opacity:0.4;}
-    50% { transform: translateY(-14px); opacity:1;}
-    100% { transform: translateY(0); opacity:0.4;}
-}
-
-.result {
-    display: none;
-    margin-top: 40px;
-    font-size: 3em;
-    font-weight: bold;
-}
-
-.result-text {
-    font-size: 1.4em;
-    margin-top: 15px;
-}
+  .sync-flag { text-align: center; font-size: .78rem; color: var(--ink-faint); margin-top: 18px; min-height: 1em; }
+  footer.foot { text-align: center; color: var(--ink-faint); font-size: .72rem; padding-top: 20px; }
 </style>
 </head>
-
 <body>
+<div class="bg-field"></div>
 
-<img src="logo.png" class="logo">
+<div class="wrap">
+  <header class="top rise">
+    <img src="logo-blue.png" class="brand-logo" alt="KMSZ – Knochenmarkspenderzentrale, Universitätsklinikum Düsseldorf">
+    <span class="pill-tag">HLA-Simulation</span>
+  </header>
 
-<div class="container">
+  <main>
+    <!-- INTRO -->
+    <section class="intro" id="intro">
+      <div class="eyebrow rise d1">Live-Experiment</div>
+      <h1 class="rise d2">Würdest&nbsp;du zu einem Patienten passen?</h1>
+      <p class="lead rise d2">Für eine Stammzellspende müssen fünf Gewebemerkmale (HLA) zwischen Spender und Patient übereinstimmen. Simuliere jetzt deinen persönlichen Abgleich.</p>
 
-<h1>Teste, ob du zu einem Patienten passen würdest</h1>
+      <div class="science-note rise d3">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="var(--brand)" stroke-width="1.6"/><path d="M12 11v5" stroke="var(--brand)" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.1" fill="var(--brand)"/></svg>
+        <span>Ein vollständiger Treffer ist extrem selten – oft nur einer unter mehreren Zehntausend. Genau das macht jede Registrierung so wertvoll.</span>
+      </div>
 
-<button id="startBtn">Simulation starten</button>
+      <div class="cta-zone rise d4">
+        <button class="btn btn-primary btn-block" id="startBtn">
+          Meinen Abgleich starten
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <p class="hint">Dauert nur wenige Sekunden</p>
+      </div>
+    </section>
 
-<div class="animation" id="animation">
-    <div class="hla">HLA-A</div>
-    <div class="hla">HLA-B</div>
-    <div class="hla">HLA-C</div>
-    <div class="hla">HLA-DR</div>
-    <div class="hla">HLA-DQ</div>
-</div>
+    <!-- SCANNING -->
+    <section class="scan" id="scan">
+      <h2>Gewebemerkmale werden abgeglichen</h2>
+      <p class="sub">Fünf HLA-Loci werden mit dem Patienten verglichen …</p>
+      <div class="loci" id="loci"></div>
+    </section>
 
-<div id="result" class="result"></div>
-<div id="resultText" class="result-text"></div>
+    <!-- RESULT -->
+    <section class="result" id="result">
+      <div class="gauge">
+        <svg width="190" height="190" viewBox="0 0 190 190">
+          <circle class="track" cx="95" cy="95" r="82" stroke-width="14" fill="none"/>
+          <circle class="val" id="gaugeVal" cx="95" cy="95" r="82" stroke-width="14"/>
+        </svg>
+        <div class="num"><b id="matchNum" class="mono">0</b><span>von 10 HLA</span></div>
+      </div>
+      <div class="verdict" id="verdict"></div>
+      <p class="msg" id="resultMsg"></p>
 
+      <div class="takeaway">
+        <svg class="heart" width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 20s-7-4.35-9.2-8.4C1.3 8.9 2.5 6 5.4 6c1.9 0 3 1.2 3.6 2.2C9.6 7.2 10.7 6 12.6 6c2.9 0 4.1 2.9 2.6 5.6C13 15.65 12 20 12 20z" fill="var(--brand)"/></svg>
+        <p id="takeaway"></p>
+      </div>
+
+      <div class="cta-zone">
+        <a class="btn btn-primary btn-block" id="registerBtn" href="#" target="_blank" rel="noopener">
+          Jetzt Spender:in werden
+        </a>
+      </div>
+      <div class="sync-flag" id="syncFlag"></div>
+      <button class="redo" id="redoBtn">Simulation wiederholen</button>
+    </section>
+  </main>
+
+  <footer class="foot">Knochenmarkspenderzentrale · Universitätsklinikum Düsseldorf</footer>
 </div>
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+/* Ziel-URL für die Registrierung als Stammzellspender:in */
+const REGISTER_URL = "https://www.lifelolli.de";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCaifpTXBg6gDxhp69FcxmyQc8vtu-Ui4o",
@@ -127,60 +173,124 @@ const firebaseConfig = {
   messagingSenderId: "193438905817",
   appId: "1:193438905817:web:b608c1af5caaa6922555c8"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const params = new URLSearchParams(window.location.search);
+const params = new URLSearchParams(location.search);
 const session = params.get("session");
+const $ = (id) => document.getElementById(id);
+$("registerBtn").href = REGISTER_URL;
 
-const btn = document.getElementById("startBtn");
-const animation = document.getElementById("animation");
-const result = document.getElementById("result");
-const resultText = document.getElementById("resultText");
-
-btn.addEventListener("click", () => {
-    btn.style.display = "none";
-    animation.style.display = "flex";
-    setTimeout(showResult, 2200);
+const LOCI = ["HLA-A", "HLA-B", "HLA-C", "HLA-DR", "HLA-DQ"];
+const lociWrap = $("loci");
+LOCI.forEach((name) => {
+  const row = document.createElement("div");
+  row.className = "locus";
+  row.innerHTML = `
+    <div class="dot">
+      <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.2 4.2L19 7" stroke="var(--positive)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="name">${name}</div>
+    <div class="state">wartet</div>`;
+  lociWrap.appendChild(row);
 });
+const rows = [...lociWrap.children];
 
-async function showResult() {
-
-    animation.style.display = "none";
-
-    const r = Math.floor(Math.random() * 1000000);
-    let match, text;
-
-    if (r < 5) {
-        match = 10;
-        text = "Vollständige Übereinstimmung";
-    } else if (r < 201) {
-        match = 9;
-        text = "Sehr nahe Übereinstimmung";
-    } else if (r < 3001) {
-        match = 8;
-        text = "Teilweise Übereinstimmung";
-    } else if (r < 40001) {
-        match = Math.random() < 0.5 ? 7 : 6;
-        text = "Keine ausreichende Übereinstimmung";
-    } else {
-        match = Math.floor(Math.random() * 4) + 3;
-        text = "Nicht kompatibel";
-    }
-
-    result.style.display = "block";
-    result.textContent = match + "/10 Match";
-    resultText.textContent = text;
-
-    await addDoc(collection(db, "results"), {
-        match: match,
-        session: session,
-        timestamp: Date.now()
-    });
+function show(section) {
+  ["intro", "scan", "result"].forEach(s => $(s).classList.toggle("show", s === section));
+  $("intro").style.display = section === "intro" ? "" : "none";
 }
 
-</script>
+$("startBtn").addEventListener("click", runScan);
+$("redoBtn").addEventListener("click", () => location.reload());
 
+async function runScan() {
+  show("scan");
+  const outcome = rollOutcome();
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i], spin = document.createElement("div");
+    spin.className = "spinner";
+    row.classList.add("active");
+    const st = row.querySelector(".state");
+    st.textContent = ""; st.appendChild(spin);
+    await wait(i === rows.length - 1 ? 820 : 460 + Math.random() * 220);
+    row.classList.remove("active"); row.classList.add("done");
+    st.textContent = "Merkmal erfasst";
+  }
+  await wait(420);
+  reveal(outcome);
+}
+
+function rollOutcome() {
+  const r = Math.floor(Math.random() * 1_000_000);
+  if (r < 5)       return { match: 10 };
+  if (r < 201)     return { match: 9 };
+  if (r < 3001)    return { match: 8 };
+  if (r < 40001)   return { match: Math.random() < 0.5 ? 7 : 6 };
+  return { match: Math.floor(Math.random() * 4) + 3 };
+}
+
+const COPY = {
+  10: { v: "Perfekter Treffer – 10/10", tier: "pos",
+        msg: "Alle Gewebemerkmale stimmen überein. Ein solcher Volltreffer unter Fremden ist extrem selten – für einen Patienten wäre das die Rettung.",
+        take: "Für die meisten Patienten gibt es weltweit nur eine Handvoll passender Menschen. <b>Vielleicht bist du für jemanden genau dieser Mensch.</b>" },
+  9:  { v: "Sehr nahe dran – 9/10", tier: "pos",
+        msg: "Fast alle Merkmale passen. In vielen Fällen reicht das bereits für eine Transplantation.",
+        take: "So nah passende Spender sind rar. <b>Registrierte Spender:innen machen genau solche Treffer erst möglich.</b>" },
+  8:  { v: "Teilweise Übereinstimmung – 8/10", tier: "soft",
+        msg: "Einige Merkmale passen, für eine Spende reicht das meist noch nicht. Zeigt aber, wie fein die Übereinstimmung sein muss.",
+        take: "Je mehr Menschen registriert sind, desto größer die Chance, dass für jeden Patienten der passende Treffer dabei ist. <b>Deine Registrierung erweitert diese Chance.</b>" },
+  7:  { v: "Keine ausreichende Übereinstimmung", tier: "neutral",
+        msg: "Diesmal passt es nicht – und genau das ist der Normalfall. Die Wahrscheinlichkeit, zufällig zu passen, ist winzig.",
+        take: "Gerade weil Treffer so selten sind, zählt jede:r Einzelne. <b>Mit deiner Registrierung steigt für jemanden die Hoffnung.</b>" },
+  default: { v: "Keine Übereinstimmung", tier: "neutral",
+        msg: "Diesmal war kein passendes Profil dabei – so geht es den allermeisten. Ein Treffer ist die große Ausnahme, kein Zufall auf Knopfdruck.",
+        take: "Kein Match heute? Das ist der beste Grund, sich zu registrieren: <b>Je mehr Menschen mitmachen, desto sicherer findet jeder Patient seinen Spender.</b>" }
+};
+
+function reveal({ match }) {
+  show("result");
+  const c = COPY[match] || COPY.default;
+  const color = c.tier === "pos" ? "var(--positive)" : (c.tier === "soft" ? "var(--soft)" : "var(--brand)");
+
+  const R = 82, C = 2 * Math.PI * R;
+  const gv = $("gaugeVal");
+  gv.style.stroke = color;
+  gv.style.strokeDasharray = C;
+  gv.style.strokeDashoffset = C;
+  requestAnimationFrame(() => requestAnimationFrame(() => { gv.style.strokeDashoffset = C * (1 - match / 10); }));
+
+  animateNumber($("matchNum"), match, 1200);
+  $("verdict").textContent = c.v;
+  $("verdict").style.color = color;
+  $("resultMsg").textContent = c.msg;
+  $("takeaway").innerHTML = c.take;
+  saveResult(match);
+}
+
+async function saveResult(match) {
+  const flag = $("syncFlag");
+  flag.textContent = "Ergebnis wird geteilt …";
+  if (!session) { flag.textContent = "Demo-Modus – Ergebnis nicht mit einer Session verknüpft."; return; }
+  try {
+    await addDoc(collection(db, "results"), { match, session, timestamp: Date.now() });
+    flag.textContent = "✓ Dein Ergebnis fließt live in die Auswertung ein";
+    flag.style.color = "var(--positive)";
+  } catch (e) {
+    flag.textContent = "Verbindung nicht möglich – dein Ergebnis konnte nicht übertragen werden.";
+    flag.style.color = "var(--soft)";
+  }
+}
+
+function animateNumber(el, to, dur) {
+  const start = performance.now();
+  (function step(now) {
+    const t = Math.min(1, (now - start) / dur);
+    el.textContent = Math.round((1 - Math.pow(1 - t, 3)) * to);
+    if (t < 1) requestAnimationFrame(step);
+  })(performance.now());
+}
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+</script>
 </body>
 </html>
