@@ -4,133 +4,79 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#EEF7FD">
-<title>Session starten · KMSZ Simulator</title>
+<title>Live-Simulation · KMSZ</title>
 <link rel="stylesheet" href="theme.css">
 <style>
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 40px 26px 60px; }
-  header.top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; flex-wrap: wrap; gap: 16px; }
-  .top .brand-logo { height: 132px; }
-  @media (max-width: 560px) { .top .brand-logo { height: 96px; } }
-  .top .role { font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--brand-600);
-    background: var(--tint); padding: 8px 16px; border-radius: var(--r-pill); }
+  html, body { height: 100%; overflow: hidden; }
+  .stage { height: 100dvh; max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column;
+    padding: clamp(18px, 2.4vh, 34px) clamp(24px, 3vw, 56px); }
 
-  /* Pre-start hero */
-  .hero { max-width: 680px; }
-  .hero h1 { font-size: clamp(2.1rem, 5.2vw, 3.2rem); }
-  .hero .lead { margin-top: 18px; max-width: 580px; }
-  .steps { display: flex; gap: 14px; margin-top: 30px; flex-wrap: wrap; }
-  .step { display: flex; gap: 12px; align-items: center; color: var(--ink-soft); font-size: .92rem;
-    background: #fff; border: 1px solid var(--line-soft); padding: 12px 16px; border-radius: var(--r-md); box-shadow: var(--shadow-sm); }
-  .step b { color: var(--ink); font-weight: 700; }
-  .step .n { width: 26px; height: 26px; border-radius: 50%; background: var(--tint); color: var(--brand-700);
-    font-weight: 800; display: grid; place-items: center; font-size: .82rem; flex: none; }
-  .start-cta { margin-top: 38px; }
-
-  /* Live session */
-  .session { display: none; }
-  .session.show { display: block; }
-  .grid { display: grid; grid-template-columns: minmax(0,1fr) 330px; gap: 24px; align-items: start; }
-  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
-
-  .panel { padding: 30px; }
-  .panel h2 { font-size: 1.5rem; margin-bottom: 6px; }
-  .panel .sub { color: var(--ink-soft); font-size: .95rem; margin-bottom: 26px; }
-
-  .qr-block { display: flex; gap: 28px; align-items: center; flex-wrap: wrap; }
-  .qr-frame { background: #fff; padding: 14px; border-radius: var(--r-md); line-height: 0; border: 1px solid var(--line); box-shadow: var(--shadow-sm); }
-  .qr-frame img { width: 232px; height: 232px; display: block; border-radius: 6px; }
-  .qr-side { flex: 1; min-width: 200px; }
-  .qr-side .k { font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
-  .session-id { font-size: 2.5rem; font-weight: 800; letter-spacing: .1em; font-variant-numeric: tabular-nums; color: var(--brand-800); }
-  .linkline { display: flex; gap: 8px; margin-top: 20px; }
-  .linkline input { flex: 1; min-width: 0; font-family: inherit; font-size: .9rem; color: var(--ink);
-    background: var(--tint-2); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 11px 13px; }
-  .copy-btn { flex: none; padding: 11px 16px; font-size: .9rem; }
-
-  .side-stack { display: flex; flex-direction: column; gap: 18px; }
-  .stat-card { padding: 26px; text-align: center; }
-  .stat-card .k { font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); }
-  .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--positive);
-    margin-right: 7px; animation: pulse 1.8s infinite; vertical-align: middle; }
+  .head { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex: none; }
+  .head .brand-logo { height: clamp(70px, 9vh, 128px); }
+  .head .live { display: flex; align-items: center; gap: 10px; font-size: clamp(.72rem,1.1vw,.85rem); font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--brand-700);
+    background: var(--tint); padding: 9px 18px; border-radius: var(--r-pill); white-space: nowrap; }
+  .live-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--positive); animation: pulse 1.8s infinite; }
   @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(53,168,122,.5);} 70%{box-shadow:0 0 0 12px rgba(53,168,122,0);} 100%{box-shadow:0 0 0 0 rgba(53,168,122,0);} }
-  .stat-num { font-size: 3.8rem; font-weight: 800; line-height: 1; margin: 14px 0 4px; font-variant-numeric: tabular-nums; color: var(--brand-800); }
-  .stat-label { color: var(--ink-soft); font-size: .92rem; }
-  .actions { display: flex; flex-direction: column; gap: 12px; }
 
-  .toast { position: fixed; left: 50%; bottom: 30px; transform: translate(-50%, 20px); opacity: 0;
-    background: var(--positive); color: #fff; font-weight: 700; padding: 12px 22px; border-radius: var(--r-pill);
-    transition: opacity .3s, transform .3s var(--ease-spring); pointer-events: none; box-shadow: var(--shadow-md); }
-  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(14px, 2.4vh, 30px); min-height: 0; }
+  .kicker { font-size: clamp(.76rem,1vw,.85rem); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--brand-600); }
+  h1 { font-size: clamp(1.7rem, 3.6vw, 2.8rem); text-align: center; }
+
+  .qr-frame { background: #fff; padding: clamp(12px,1.4vw,18px); border-radius: var(--r-lg); line-height: 0; border: 1px solid var(--line); box-shadow: var(--shadow-md); }
+  .qr-frame img { width: clamp(220px, 32vh, 380px); height: clamp(220px, 32vh, 380px); display: block; border-radius: 8px; }
+  .sid { font-size: clamp(.82rem,1.1vw,.98rem); color: var(--ink-soft); }
+  .sid b { color: var(--brand-800); letter-spacing: .12em; font-variant-numeric: tabular-nums; }
+
+  .counter { display: flex; align-items: baseline; gap: 14px; }
+  .counter .n { font-size: clamp(2.8rem, 6vh, 4.6rem); font-weight: 800; line-height: 1; color: var(--brand-700); font-variant-numeric: tabular-nums; }
+  .counter .l { font-size: clamp(1rem,1.4vw,1.25rem); color: var(--ink-soft); }
+
+  .reveal { margin-top: clamp(4px,1vh,10px); }
+
+  .foot { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding-top: 6px; }
+  .foot .brand-note { color: var(--ink-faint); font-size: clamp(.68rem,.9vw,.78rem); }
+  .foot .ctrls { display: flex; gap: 10px; }
+  .mini { appearance: none; cursor: pointer; font-family: inherit; font-weight: 600; font-size: clamp(.74rem,.95vw,.85rem);
+    color: var(--brand-700); background: #fff; border: 1.5px solid var(--line); border-radius: var(--r-pill);
+    padding: 8px 16px; display: inline-flex; align-items: center; gap: 7px; transition: background .2s, border-color .2s; }
+  .mini:hover { background: var(--tint-2); border-color: var(--brand-400); }
 </style>
 </head>
 <body>
 <div class="bg-field"></div>
 
-<div class="wrap">
-  <header class="top rise">
+<div class="stage">
+  <div class="head">
     <img src="logo-blue.png" class="brand-logo" alt="KMSZ – Knochenmarkspenderzentrale, Universitätsklinikum Düsseldorf">
-    <span class="role">Vortragenden-Ansicht</span>
-  </header>
+    <div class="live"><span class="live-dot"></span> Live-Simulation</div>
+  </div>
 
-  <!-- PRE-START -->
-  <section class="hero" id="hero">
-    <div class="eyebrow rise d1">Präsentations-Steuerung</div>
-    <h1 class="rise d2">Starte eine Live-Session für dein Publikum</h1>
-    <p class="lead rise d2">Mit einem Klick erzeugst du einen QR-Code. Dein Publikum scannt ihn, nimmt gleichzeitig an der HLA-Simulation teil – und du zeigst die Ergebnisse live auf der Leinwand.</p>
-
-    <div class="steps rise d3">
-      <div class="step"><span class="n">1</span><span><b>Session erzeugen</b> &nbsp;·&nbsp; QR erscheint</span></div>
-      <div class="step"><span class="n">2</span><span><b>Publikum scannt</b> &nbsp;·&nbsp; alle machen mit</span></div>
-      <div class="step"><span class="n">3</span><span><b>Ergebnisse zeigen</b> &nbsp;·&nbsp; live auf der Leinwand</span></div>
+  <main>
+    <div class="kicker">Jetzt mitmachen</div>
+    <h1>QR-Code scannen und deinen HLA-Abgleich starten</h1>
+    <div class="qr-frame"><img id="qrImg" alt="QR-Code zum Mitmachen"></div>
+    <div class="sid">Session <b id="sessionId">–</b></div>
+    <div class="counter">
+      <span class="n mono" id="liveCount">0</span>
+      <span class="l">Teilnehmende</span>
     </div>
-
-    <div class="start-cta rise d4">
-      <button class="btn btn-primary" id="createBtn">
-        Neue Session erzeugen
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <div class="reveal">
+      <button class="btn btn-primary" id="revealBtn">
+        Ergebnisse anzeigen
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
     </div>
-  </section>
+  </main>
 
-  <!-- LIVE SESSION -->
-  <section class="session" id="sessionView">
-    <div class="eyebrow rise" style="margin-bottom:14px">Session aktiv</div>
-    <div class="grid">
-      <div class="panel card rise">
-        <h2>Publikum einladen</h2>
-        <p class="sub">Zeige diesen QR-Code auf der Leinwand. Jede:r im Raum scannt ihn mit dem Smartphone.</p>
-        <div class="qr-block">
-          <div class="qr-frame"><img id="qrImg" alt="QR-Code zum Mitmachen"></div>
-          <div class="qr-side">
-            <div class="k">Session-ID</div>
-            <div class="session-id mono" id="sessionId">–</div>
-            <div class="linkline">
-              <input id="simLink" readonly>
-              <button class="btn btn-ghost copy-btn" id="copyLink">Kopieren</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="side-stack rise d2">
-        <div class="stat-card card">
-          <div class="k"><span class="live-dot"></span>Live</div>
-          <div class="stat-num mono" id="liveCount">0</div>
-          <div class="stat-label">Teilnehmende bisher</div>
-        </div>
-        <div class="actions">
-          <a class="btn btn-primary btn-block" id="openResults" target="_blank" rel="noopener">
-            Ergebnisse-Ansicht öffnen
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M9 7h8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </a>
-          <button class="btn btn-ghost btn-block" id="newSession">Andere Session starten</button>
-        </div>
-      </div>
+  <div class="foot">
+    <span class="brand-note">Knochenmarkspenderzentrale · Universitätsklinikum Düsseldorf</span>
+    <div class="ctrls">
+      <button class="mini" id="fsBtn" title="Vollbild"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Vollbild</button>
+      <button class="mini" id="newBtn" title="Neue Session"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 8M20 12a8 8 0 0 1-13.7 5.6L4 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 4v4h-4M4 20v-4h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Neue Session</button>
     </div>
-  </section>
+  </div>
 </div>
-
-<div class="toast" id="toast">Link kopiert</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
@@ -149,51 +95,53 @@ const db = getFirestore(app);
 
 const BASE = "https://tunakmz.github.io/kmsz-simulator/";
 const $ = (id) => document.getElementById(id);
-let unsub = null;
+let unsub = null, currentId = null;
 
 function newId() {
   return (Date.now().toString(36).slice(-4) + Math.random().toString(36).slice(2, 4)).toUpperCase();
 }
+/* Auto-session: fresh per talk (new tab), stable across accidental reloads */
+function getSession(forceNew) {
+  let id = forceNew ? null : sessionStorage.getItem("kmsz_session");
+  if (!id) { id = newId(); sessionStorage.setItem("kmsz_session", id); }
+  return id;
+}
 
-function startSession() {
-  const id = newId();
+function start(forceNew) {
+  const id = currentId = getSession(forceNew);
   const simLink = BASE + "index.html?session=" + id;
-  const resultLink = BASE + "results.html?session=" + id;
-
   $("sessionId").textContent = id;
-  $("simLink").value = simLink;
-  $("qrImg").src = "https://api.qrserver.com/v1/create-qr-code/?size=480x480&margin=0&color=145273&data=" + encodeURIComponent(simLink);
-  $("openResults").href = resultLink;
-
-  $("hero").style.display = "none";
-  $("sessionView").classList.add("show");
+  $("qrImg").src = "https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=0&color=145273&data=" + encodeURIComponent(simLink);
+  $("liveCount").textContent = "0"; $("liveCount").dataset.v = "0";
 
   if (unsub) unsub();
   const q = query(collection(db, "results"), where("session", "==", id));
-  unsub = onSnapshot(q, (snap) => {
-    const el = $("liveCount");
-    const prev = +el.textContent || 0;
-    if (snap.size !== prev) countTo(el, prev, snap.size);
-  }, () => {});
+  unsub = onSnapshot(q, (snap) => animateStat($("liveCount"), snap.size), () => {});
 }
 
-function countTo(el, from, to) {
-  const start = performance.now(), dur = 500;
-  (function step(now) {
-    const t = Math.min(1, (now - start) / dur);
-    el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - t, 3)));
-    if (t < 1) requestAnimationFrame(step);
+function animateStat(el, to) {
+  const from = parseInt(el.dataset.v || "0", 10);
+  if (from === to) return;
+  el.dataset.v = to;
+  const s = performance.now(), dur = 500;
+  (function step(now){ const t = Math.min(1,(now-s)/dur);
+    el.textContent = Math.round(from+(to-from)*(1-Math.pow(1-t,3)));
+    if (t<1) requestAnimationFrame(step);
   })(performance.now());
 }
 
-$("createBtn").addEventListener("click", startSession);
-$("newSession").addEventListener("click", startSession);
-
-$("copyLink").addEventListener("click", async () => {
-  try { await navigator.clipboard.writeText($("simLink").value); }
-  catch { $("simLink").select(); document.execCommand("copy"); }
-  const t = $("toast"); t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 1600);
+$("revealBtn").addEventListener("click", () => {
+  location.href = "results.html?session=" + encodeURIComponent(currentId);
 });
+$("newBtn").addEventListener("click", () => {
+  if (confirm("Neue Session starten? Die aktuelle Auswertung wird zurückgesetzt.")) start(true);
+});
+$("fsBtn").addEventListener("click", () => {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+  else document.exitFullscreen?.();
+});
+
+start(false);
 </script>
 </body>
 </html>
